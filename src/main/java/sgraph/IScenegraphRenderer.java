@@ -4,6 +4,7 @@ import org.joml.Matrix4f;
 
 import util.IVertexData;
 import util.Light;
+import util.TextureImage;
 
 import java.util.List;
 import java.util.Map;
@@ -90,4 +91,6 @@ public interface IScenegraphRenderer {
   void initLightsInShader(List<Light> lights);
 
   void dispose();
+
+  Map<String, TextureImage> getTextures();
 }

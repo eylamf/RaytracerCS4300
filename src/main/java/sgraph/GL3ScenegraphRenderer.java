@@ -163,6 +163,11 @@ public class GL3ScenegraphRenderer implements IScenegraphRenderer {
   }
 
   @Override
+  public Map<String, TextureImage> getTextures() {
+    return textures;
+  }
+
+  @Override
   public void initLightsInShader(List<Light> lights) {
     int loc = -1;
 

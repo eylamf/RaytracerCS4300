@@ -101,7 +101,11 @@ public class JOGLFrame extends JFrame {
 
     @Override
     public void keyReleased(KeyEvent e) {
-
+      switch (e.getKeyCode()) {
+        case KeyEvent.VK_R:
+          view.turnRaytraceOn();
+          break;
+      }
     }
   }
 

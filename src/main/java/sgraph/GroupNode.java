@@ -4,10 +4,14 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 import org.joml.Matrix4f;
 
+import rtHelpers.HitRecord;
+import rtHelpers.Ray3D;
 import util.Light;
+import util.TextureImage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -145,5 +149,13 @@ public class GroupNode extends AbstractNode {
     //now get the lights from this node's lights
     lights.addAll(super.getLightsInView(modelview));
     return lights;
+  }
+
+  @Override
+  public void intersect(Ray3D ray, Stack<Matrix4f> mv, HitRecord hitRecord, Map<String, TextureImage> textureImageMap) {
+    // Simply call children
+    for (int i = 0; i < children.size(); i++) {
+      children.get(i).intersect(ray, mv, hitRecord, textureImageMap);
+    }
   }
 }

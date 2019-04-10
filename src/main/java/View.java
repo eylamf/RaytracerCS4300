@@ -4,6 +4,9 @@ import com.jogamp.opengl.*;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import sgraph.GL3ScenegraphRenderer;
+import sgraph.IScenegraphRenderer;
+import sgraph.RaytracerRenderer;
 
 
 import java.io.InputStream;
@@ -33,6 +36,11 @@ public class View {
   private int projectionLocation;
   private sgraph.IScenegraph<VertexAttrib> scenegraph;
 
+  // Raytracer
+  private boolean isRaytraceOn;
+  private IScenegraphRenderer normalRenderer;
+  private IScenegraphRenderer raytracerRenderer;
+
 
   public View() {
     projection = new Matrix4f();
@@ -40,6 +48,7 @@ public class View {
     trackballRadius = 300;
     trackballTransform = new Matrix4f();
     scenegraph = null;
+    isRaytraceOn = false;
   }
 
   public void initScenegraph(GLAutoDrawable gla, InputStream in) throws Exception {
@@ -52,15 +61,18 @@ public class View {
 
     scenegraph = sgraph.SceneXMLReader.importScenegraph(in, new VertexAttribProducer());
 
-    sgraph.IScenegraphRenderer renderer = new sgraph.GL3ScenegraphRenderer();
-    renderer.setContext(gla);
+    // Set normal renderer
+    normalRenderer = new GL3ScenegraphRenderer();
+    normalRenderer.setContext(gla);
+
     Map<String, String> shaderVarsToVertexAttribs = new HashMap<String, String>();
     shaderVarsToVertexAttribs.put("vPosition", "position");
     shaderVarsToVertexAttribs.put("vNormal", "normal");
     shaderVarsToVertexAttribs.put("vTexCoord", "texcoord");
-    renderer.initShaderProgram(program, shaderVarsToVertexAttribs);
-    scenegraph.setRenderer(renderer);
-    program.disable(gl);
+    normalRenderer.initShaderProgram(program, shaderVarsToVertexAttribs);
+    scenegraph.setRenderer(normalRenderer);
+
+    raytracerRenderer = new RaytracerRenderer(120, 800, 800);
   }
 
   public void init(GLAutoDrawable gla) throws Exception {
@@ -81,14 +93,6 @@ public class View {
 
 
   public void draw(GLAutoDrawable gla) {
-    GL3 gl = gla.getGL().getGL3();
-
-    gl.glClearColor(0, 0, 0, 1);
-    gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
-    gl.glEnable(gl.GL_DEPTH_TEST);
-
-
-    program.enable(gl);
 
     while (!modelView.empty())
       modelView.pop();
@@ -105,31 +109,13 @@ public class View {
             .mul(trackballTransform);
 
 
-    /*
-     *Supply the shader with all the matrices it expects.
-    */
-    FloatBuffer fb = Buffers.newDirectFloatBuffer(16);
-    gl.glUniformMatrix4fv(projectionLocation, 1, false, projection.get(fb));
+    if (isRaytraceOn) {
+      raytrace();
+      isRaytraceOn = false;
+    } else {
 
-    //a uniform texture matrix for everybody
-    gl.glUniformMatrix4fv(shaderLocations.getLocation("texturematrix"),
-            1,false,new Matrix4f().identity().get(fb));
-
-    scenegraph.draw(modelView);
-    /*
-     *OpenGL batch-processes all its OpenGL commands.
-          *  *The next command asks OpenGL to "empty" its batch of issued commands, i.e. draw
-     *
-     *This a non-blocking function. That is, it will signal OpenGL to draw, but won't wait for it to
-     *finish drawing.
-     *
-     *If you would like OpenGL to start drawing and wait until it is done, call glFinish() instead.
-     */
-    gl.glFlush();
-
-    program.disable(gl);
-
-
+      drawNormal(gla);
+    }
   }
 
   public void mousePressed(int x, int y) {
@@ -168,5 +154,80 @@ public class View {
 
   }
 
+  // Draw scene as usual
+  private void drawNormal(GLAutoDrawable gla) {
+      if (normalRenderer == null) {
+          normalRenderer = new GL3ScenegraphRenderer();
+          normalRenderer.setContext(gla);
 
+          Map<String, String> shaderVarsToVertexAttribs = new HashMap<String, String>();
+          shaderVarsToVertexAttribs.put("vPosition", "position");
+          shaderVarsToVertexAttribs.put("vNormal", "normal");
+          shaderVarsToVertexAttribs.put("vTexCoord", "texcoord");
+          normalRenderer.initShaderProgram(program, shaderVarsToVertexAttribs);
+
+          try {
+              scenegraph.setRenderer(normalRenderer);
+          } catch (Exception e) {
+              System.out.println("Failed to set renderer to normalRenderer again");
+          }
+      }
+
+    GL3 gl = gla.getGL().getGL3();
+
+    gl.glClearColor(0, 0, 0, 1);
+    gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
+    gl.glEnable(gl.GL_DEPTH_TEST);
+
+
+    program.enable(gl);
+    /*
+     *Supply the shader with all the matrices it expects.
+     */
+    FloatBuffer fb = Buffers.newDirectFloatBuffer(16);
+    gl.glUniformMatrix4fv(projectionLocation, 1, false, projection.get(fb));
+
+    //a uniform texture matrix for everybody
+    gl.glUniformMatrix4fv(shaderLocations.getLocation("texturematrix"),
+            1,false,new Matrix4f().identity().get(fb));
+
+    scenegraph.draw(modelView);
+    /*
+     *OpenGL batch-processes all its OpenGL commands.
+     *  *The next command asks OpenGL to "empty" its batch of issued commands, i.e. draw
+     *
+     *This a non-blocking function. That is, it will signal OpenGL to draw, but won't wait for it to
+     *finish drawing.
+     *
+     *If you would like OpenGL to start drawing and wait until it is done, call glFinish() instead.
+     */
+    gl.glFlush();
+
+    program.disable(gl);
+  }
+
+  public void turnRaytraceOn() {
+    isRaytraceOn = true;
+  }
+
+  public void raytrace() {
+    System.out.println("STARTED RAYTRACE");
+
+    try {
+      scenegraph.setRenderer(raytracerRenderer);
+    } catch (Exception e) {
+      System.out.println("Failed to set renderer");
+    }
+
+    scenegraph.draw(modelView);
+    modelView.pop();
+
+    try {
+      normalRenderer = null;
+    } catch (Exception e){
+      System.out.println("Failed to set normalRenderer to null");
+    }
+
+    System.out.println("FINISHED RAYRACE");
+  }
 }
