@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import rtHelpers.HitRecord;
+import rtHelpers.Ray3D;
 import util.Light;
 
 /**
@@ -172,4 +174,8 @@ public abstract class AbstractNode implements INode {
     return listLights;
   }
 
+  @Override
+  public List<HitRecord> raycast(Ray3D ray, Stack<Matrix4f> transforms) throws IllegalArgumentException{
+    throw new UnsupportedOperationException("Raycasting not supported yet!");
+  }
 }

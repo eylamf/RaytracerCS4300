@@ -4,9 +4,12 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 import org.joml.Matrix4f;
 
+import rtHelpers.HitRecord;
+import rtHelpers.Ray3D;
 import util.Light;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -145,5 +148,19 @@ public class GroupNode extends AbstractNode {
     //now get the lights from this node's lights
     lights.addAll(super.getLightsInView(modelview));
     return lights;
+  }
+
+  @Override
+  public List<HitRecord> raycast(Ray3D ray, Stack<Matrix4f> mv) {
+    List<HitRecord> hitRecords = new ArrayList();
+
+    for (int i = 0; i < children.size(); i++) {
+      List<HitRecord> childHitRecords = children.get(i).raycast(ray, mv);
+      hitRecords.addAll(childHitRecords);
+    }
+
+    Collections.sort(hitRecords);
+
+    return hitRecords;
   }
 }

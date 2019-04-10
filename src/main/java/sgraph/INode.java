@@ -4,6 +4,8 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 import org.joml.Matrix4f;
 
+import rtHelpers.HitRecord;
+import rtHelpers.Ray3D;
 import util.Light;
 
 import java.util.List;
@@ -142,5 +144,8 @@ public interface INode {
    * transformation.
    */
   List<Light> getLightsInView(Stack<Matrix4f> modelview);
+
+
+  List<HitRecord> raycast(Ray3D ray, Stack<Matrix4f> transforms);
 }
 

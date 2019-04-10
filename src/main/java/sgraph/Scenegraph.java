@@ -3,6 +3,8 @@ package sgraph;
 
 import org.joml.Matrix4f;
 
+import rtHelpers.HitRecord;
+import rtHelpers.Ray3D;
 import util.IVertexData;
 import util.Light;
 import util.PolygonMesh;
@@ -142,5 +144,16 @@ public class Scenegraph<VertexType extends IVertexData> implements IScenegraph<V
     textures.put(name, path);
   }
 
+  @Override
+  public List<HitRecord> raycast(Ray3D ray, Stack<Matrix4f> mv) {
+    List<HitRecord> hitRecords = root.raycast(ray, mv);
+    return hitRecords;
+  }
 
+  @Override
+  public List<Light> getLights(Stack<Matrix4f> mv) {
+    List<Light> lights = root.getLightsInView(mv);
+
+    return lights;
+  }
 }

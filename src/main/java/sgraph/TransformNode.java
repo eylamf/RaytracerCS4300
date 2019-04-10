@@ -4,6 +4,8 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 import org.joml.Matrix4f;
 
+import rtHelpers.HitRecord;
+import rtHelpers.Ray3D;
 import util.Light;
 
 import java.util.ArrayList;
@@ -189,5 +191,21 @@ public class TransformNode extends AbstractNode {
     //now get the lights from this node's lights
     lights.addAll(super.getLightsInView(modelview));
     return lights;
+  }
+
+  @Override
+  public List<HitRecord> raycast(Ray3D ray, Stack<Matrix4f> mv) {
+    List<HitRecord> hitRecords = new ArrayList();
+
+    mv.push(new Matrix4f(mv.peek()));
+    mv.peek().mul(animation_transform).mul(transform);
+
+    if (child != null) {
+      hitRecords = child.raycast(ray, mv);
+    }
+
+    mv.pop();
+
+    return hitRecords;
   }
 }

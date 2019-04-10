@@ -3,9 +3,13 @@ package sgraph;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import org.joml.Matrix4f;
+import rtHelpers.HitRecord;
+import rtHelpers.Ray3D;
 import util.IVertexData;
+import util.Light;
 import util.ShaderProgram;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -100,4 +104,8 @@ public interface IScenegraph<VertexType extends IVertexData>
      */
     void addTexture(String name,String path);
     void dispose();
+
+    List<HitRecord> raycast(Ray3D ray, Stack<Matrix4f> mv);
+
+    List<Light> getLights(Stack<Matrix4f> modelViews);
 }
