@@ -142,9 +142,13 @@ public class RaytracerRenderer implements IScenegraphRenderer {
 
             float nDotL = normalVector.dot(lightVector);
 
-            // Shadow rendering
 
-            boolean cantSee = false;
+            /////////////////////
+            // SHADOWS FOR HW8 //
+            /////////////////////
+
+            // As per hw statement, "If it does not, ignore that light"
+            boolean doesPointNotSeeLight = false;
 
             if (light.getPosition().w != 0) {
                 Vector4f p = new Vector4f(hitRecord.startPoint);
@@ -157,22 +161,23 @@ public class RaytracerRenderer implements IScenegraphRenderer {
                 root.intersect(new Ray3D(p, v), mv, hit, textures);
 
                 if (hit.isHit()) {
-                    cantSee = true;
+                    doesPointNotSeeLight = true;
                 }
             } else {
                 Vector4f p = new Vector4f(hitRecord.startPoint);
                 Vector4f v = new Vector4f(new Vector3f(lightVector), 0);
+                // Avoiding precision errors
                 p = p.add(new Vector4f(v).mul(0.1f));
 
                 HitRecord hit = new HitRecord();
                 root.intersect(new Ray3D(p, v), mv, hit, textures);
 
                 if (hit.isHit() && light.getPosition().distance(new Vector4f(p)) - hit.getT() > 0.0001f) {
-                    cantSee = true;
+                    doesPointNotSeeLight = true;
                 }
             }
 
-            if (cantSee) {
+            if (doesPointNotSeeLight) {
                 continue;
             }
 
