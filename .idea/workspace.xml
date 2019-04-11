@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8bf3d1c5-f58a-4346-9739-e59e13b36e52" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/raytrace.png" beforeDir="false" afterPath="$PROJECT_DIR$/output/raytrace.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/sgraph/LeafNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/sgraph/LeafNode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/sgraph/RaytracerRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/sgraph/RaytracerRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/scenegraphmodels/face-hierarchy.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/scenegraphmodels/face-hierarchy.xml" afterDir="false" />
     </list>
     <ignored path="ScenegraphsLightsTextures.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -38,11 +34,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/resources/scenegraphmodels/face-hierarchy.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="97">
-              <caret line="63" column="20" selection-start-line="63" selection-start-column="20" selection-end-line="76" selection-end-column="32" />
+            <state relative-caret-position="127">
+              <caret line="65" column="16" lean-forward="true" selection-start-line="65" selection-start-column="16" selection-end-line="65" selection-end-column="16" />
             </state>
           </provider>
         </entry>
@@ -121,11 +117,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/sgraph/RaytracerRenderer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-108">
-              <caret line="206" column="99" selection-start-line="206" selection-start-column="99" selection-end-line="206" selection-end-column="99" />
+            <state relative-caret-position="-93">
+              <caret line="279" column="46" lean-forward="true" selection-start-line="279" selection-start-column="46" selection-end-line="279" selection-end-column="46" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#9273#9274#0" expanded="true" />
@@ -206,8 +202,8 @@
         <option value="$PROJECT_DIR$/src/main/java/sgraph/GL3ScenegraphRenderer.java" />
         <option value="$PROJECT_DIR$/src/main/java/View.java" />
         <option value="$PROJECT_DIR$/src/main/java/sgraph/LeafNode.java" />
-        <option value="$PROJECT_DIR$/src/main/java/sgraph/RaytracerRenderer.java" />
         <option value="$PROJECT_DIR$/src/main/resources/scenegraphmodels/face-hierarchy.xml" />
+        <option value="$PROJECT_DIR$/src/main/java/sgraph/RaytracerRenderer.java" />
       </list>
     </option>
   </component>
@@ -317,7 +313,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554945882191" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554947942670" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../CS 5004/intellij/IOAbstractionFromClass" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
@@ -460,7 +456,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="17873000" />
+    <option name="totallyTimeSpent" value="18637000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="4" y="23" width="829" height="877" extended-state="0" />
@@ -708,10 +704,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/resources/scenegraphmodels/face-hierarchy.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="127">
+          <caret line="65" column="16" lean-forward="true" selection-start-line="65" selection-start-column="16" selection-end-line="65" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/output/raytrace.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/sgraph/RaytracerRenderer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-108">
-          <caret line="206" column="99" selection-start-line="206" selection-start-column="99" selection-end-line="206" selection-end-column="99" />
+        <state relative-caret-position="-93">
+          <caret line="279" column="46" lean-forward="true" selection-start-line="279" selection-start-column="46" selection-end-line="279" selection-end-column="46" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#9273#9274#0" expanded="true" />
@@ -719,16 +725,6 @@
             <element signature="e#9459#9460#0" expanded="true" />
             <element signature="e#9490#9491#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/output/raytrace.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/resources/scenegraphmodels/face-hierarchy.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="97">
-          <caret line="63" column="20" selection-start-line="63" selection-start-column="20" selection-end-line="76" selection-end-column="32" />
         </state>
       </provider>
     </entry>

@@ -142,6 +142,8 @@ public class RaytracerRenderer implements IScenegraphRenderer {
 
             float nDotL = normalVector.dot(lightVector);
 
+            // Shadow rendering
+
             boolean cantSee = false;
 
             if (light.getPosition().w != 0) {
@@ -175,6 +177,7 @@ public class RaytracerRenderer implements IScenegraphRenderer {
             }
 
             // Start to HW 8 - reflection
+
             Vector4f sp = hitRecord.startPoint;
             Vector3f viewVector = new Vector3f(sp.x, sp.y, sp.z).negate();
             viewVector = viewVector.normalize();
