@@ -68,6 +68,12 @@ public class RaytracerRenderer implements IScenegraphRenderer {
 
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
+                /*
+                V = Vector(x, y, z) where:
+                x = i - width / 2
+                y = j - height / 2
+                z = -0.5 * height / tan(0.5 * field of view)
+                 */
                 Vector4f dir = new Vector4f(i - 0.5f * width, j - 0.5f * height, -0.5f * height / (float) Math.tan(Math.toRadians(0.5 * fov)), 0);
 
                 ray3D.setDirection(dir);
@@ -100,13 +106,13 @@ public class RaytracerRenderer implements IScenegraphRenderer {
         root.intersect(ray3D, mv, hitRecord, textures);
 
         if (hitRecord.isHit()) {
-            color = shade(hitRecord, root, mv, ray3D, 0);
+            color = shade(hitRecord, root, mv);
         } else {
             color = new Color(0, 0, 0);
         }
     }
 
-    private Color shade(HitRecord hitRecord, INode root, Stack<Matrix4f> mv, Ray3D ray3D, int count) {
+    private Color shade(HitRecord hitRecord, INode root, Stack<Matrix4f> mv) {
         Vector3f color = new Vector3f(0, 0, 0);
 
         for (int i = 0; i < lights.size(); i++) {
@@ -132,15 +138,14 @@ public class RaytracerRenderer implements IScenegraphRenderer {
                 continue;
             }
 
-            Vector4f normal = hitRecord.getNormal();
-            Vector3f normalVector = new Vector3f(normal.x, normal.y, normal.z).normalize();
+            Vector3f normalVector = new Vector3f(hitRecord.normal.x, hitRecord.normal.y, hitRecord.normal.z).normalize();
 
             float nDotL = normalVector.dot(lightVector);
 
-            boolean notSee = false;
+            boolean cantSee = false;
 
             if (light.getPosition().w != 0) {
-                Vector4f p = new Vector4f(hitRecord.getStartPoint());
+                Vector4f p = new Vector4f(hitRecord.startPoint);
                 Vector4f v = new Vector4f(new Vector3f(lightVector), 0);
 
                 p = p.add(new Vector4f(v).mul(0.1f));
@@ -150,10 +155,10 @@ public class RaytracerRenderer implements IScenegraphRenderer {
                 root.intersect(new Ray3D(p, v), mv, hit, textures);
 
                 if (hit.isHit()) {
-                    notSee = true;
+                    cantSee = true;
                 }
             } else {
-                Vector4f p = new Vector4f(hitRecord.getStartPoint());
+                Vector4f p = new Vector4f(hitRecord.startPoint);
                 Vector4f v = new Vector4f(new Vector3f(lightVector), 0);
                 p = p.add(new Vector4f(v).mul(0.1f));
 
@@ -161,16 +166,16 @@ public class RaytracerRenderer implements IScenegraphRenderer {
                 root.intersect(new Ray3D(p, v), mv, hit, textures);
 
                 if (hit.isHit() && light.getPosition().distance(new Vector4f(p)) - hit.getT() > 0.0001f) {
-                    notSee = true;
+                    cantSee = true;
                 }
             }
 
-            if (notSee) {
+            if (cantSee) {
                 continue;
             }
 
             // Start to HW 8 - reflection
-            Vector4f sp = hitRecord.getStartPoint();
+            Vector4f sp = hitRecord.startPoint;
             Vector3f viewVector = new Vector3f(sp.x, sp.y, sp.z).negate();
             viewVector = viewVector.normalize();
 
@@ -199,12 +204,20 @@ public class RaytracerRenderer implements IScenegraphRenderer {
         }
 
         // add texture
-        Vector3f texture = new Vector3f(hitRecord.getTexture().x, hitRecord.getTexture().y, hitRecord.getTexture().z);
+        Vector3f texture = new Vector3f(hitRecord.texture.x, hitRecord.texture.y, hitRecord.texture.z);
 
         color = color.mul(texture);
 
         float absorption = hitRecord.getMaterial().getAbsorption();
 
+        /*
+        TODO FOR HW8
+        a - coeff for absorption
+        r = coeff for reflection
+        a + r = 1
+
+        color at point = a * color for shading + r * color from reflection
+         */
         if (absorption > 1 || absorption < 0) {
             absorption = 1;
         }
@@ -212,6 +225,22 @@ public class RaytracerRenderer implements IScenegraphRenderer {
         color = color.mul(absorption);
 
         // TODO HW 8 REFLECTION and REFRACTION
+
+        /*
+        Refraction
+        Snells law of refraction
+        P = Point of intersection
+        N = Noraml at P
+        I = incoming ray
+        T = Refracted ray
+        X = Ray perp to N
+
+        thetaI = angle between I and N
+        thetaT = angle between T and -N
+        MuI = refractive index of I
+        MuT = refractive index of T
+        sin(thetaI)/sin(thetaT) = MuT / MuI
+         */
 
         clamp(color);
 

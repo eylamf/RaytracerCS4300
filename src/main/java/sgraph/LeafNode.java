@@ -60,277 +60,304 @@ public class LeafNode extends AbstractNode
 
     @Override
     public void intersect(Ray3D ray, Stack<Matrix4f> mv, HitRecord hitRecord, Map<String, TextureImage> textureImageMap) {
-        Ray3D rayObject = new Ray3D();
-        Matrix4f leafToView = new Matrix4f(mv.peek());
-        Matrix4f viewToLeaf = new Matrix4f(leafToView).invert();
-        rayObject.startPoint = new Vector4f(ray.startPoint);
-        rayObject.direction = new Vector4f(ray.direction);
+        Ray3D newRay = new Ray3D();
+        Matrix4f nodeToWorld = new Matrix4f(mv.peek());
+        Matrix4f worldToNode = new Matrix4f(nodeToWorld).invert();
 
-        rayObject.startPoint = viewToLeaf.transform(rayObject.startPoint);
-        rayObject.direction = viewToLeaf.transform(rayObject.direction);
+        newRay.startPoint = new Vector4f(ray.startPoint);
+        newRay.direction = new Vector4f(ray.direction);
 
-
-        if (objInstanceName.equals("sphere"))
-        {
-            float a,b,c;
-
-            a = rayObject.direction.lengthSquared();
-            b = 2*rayObject.startPoint.dot(rayObject.direction);
-            c = rayObject.startPoint.lengthSquared()-1 - 1;
-
-            if ((b*b-4*a*c)>=0)
-            {
-                float t1 = (-b+(float)Math.sqrt(b*b-4*a*c))/(2*a);
-                float t2 = (-b-(float)Math.sqrt(b*b-4*a*c))/(2*a);
-
-                float t;
-                if (t1>=0)
-                {
-                    if (t2>=0)
-                    {
-                        t = Math.min(t1,t2);
-                    }
-                    else {
-                        t = t1;
-                    }
-                }
-                else
-                {
-                    if (t2>=0)
-                        t = t2;
-                    else
-                        return;
-                }
-
-                if (t<hitRecord.time)
-                {
-                    hitRecord.time = t;
-                    hitRecord.startPoint = new Vector4f(ray.startPoint.x+t*ray.direction.x,
-                            ray.startPoint.y+t*ray.direction.y,
-                            ray.startPoint.z+t*ray.direction.z,
-                            1);
-                    hitRecord.normal = new Vector4f(rayObject.startPoint.x+t*rayObject.direction.x,
-                            rayObject.startPoint.y+t*rayObject.direction.y,
-                            rayObject.startPoint.z+t*rayObject.direction.z,
-                            0);
-
-                    hitRecord.normal = new Matrix4f(viewToLeaf).transpose().transform(hitRecord.normal);
-                    hitRecord.normal = new Vector4f(new Vector3f(hitRecord
-                            .normal
-                            .x,hitRecord.normal.y,hitRecord.normal.z)
-                            .normalize(),0.0f);
-                    hitRecord.material = new util.Material(this.material);
+        newRay.startPoint = worldToNode.transform(newRay.startPoint);
+        newRay.direction = worldToNode.transform(newRay.direction);
 
 
-                    /**
-                     * start the texture color in sphere
-                     */
-                    Vector4f textureC = new Vector4f(1,1,1,1);
-
-                    TextureImage TI = textureImageMap.get(this.textureName);
-                    Vector4f start = rayObject.startPoint;
-                    Vector4f dir = rayObject.direction;
-                    Vector4f pointInLeaf =
-                            new Vector4f(start.x+dir.x*t, start.y+dir.y*t, start.z+dir.z*t, 1);
-                    if (TI != null) {
-                        float sphereX = pointInLeaf.x;
-                        float sphereY = pointInLeaf.y;
-                        float sphereZ = pointInLeaf.z;
-                        float phi = (float) Math.asin(sphereY);
-                        phi = phi - (float) Math.PI / 2;
-                        float theta = (float) Math.atan2((double) sphereZ, (double) sphereX);
-                        theta  = theta +(float) Math.PI;
-                        float x = (float)(0.5-(theta / (2f * Math.PI))) ;
-                        float y = (1 - (phi / ((float) Math.PI)));
-                        textureC = TI.getColor(x, y);
-                        hitRecord.texture = textureC;
-
-                    }
-                }
-
-            }
+        if (objInstanceName.equals("sphere")) {
+            intersectSphere(ray, newRay, hitRecord, textureImageMap, worldToNode);
+        } else if (objInstanceName.equals("box") || objInstanceName.equals("box-outside")) {
+            intersectRect(ray, newRay, hitRecord, textureImageMap, worldToNode);
         }
-        else if (objInstanceName.equals("box") || objInstanceName.equals("box-outside"))
-        {
-            float tmaxX,tmaxY,tmaxZ;
-            float tminX,tminY,tminZ;
 
-            if (Math.abs(rayObject.direction.x)<0.0001f)
-            {
-                if ((rayObject.startPoint.x>0.5f) || (rayObject.startPoint.x<-0.5f))
-                    return;
-                else {
-                    tminX = Float.NEGATIVE_INFINITY;
-                    tmaxX = Float.POSITIVE_INFINITY;
-                }
-            }
-            else
-            {
-                float t1 = (-0.5f-rayObject.startPoint.x)/rayObject.direction.x;
-                float t2 = (0.5f-rayObject.startPoint.x)/rayObject.direction.x;
-                tminX = Math.min(t1,t2);
-                tmaxX = Math.max(t1,t2);
-            }
+    }
 
-            if (Math.abs(rayObject.direction.y)<0.0001f)
-            {
-                if ((rayObject.startPoint.y>0.5f) || (rayObject.startPoint.y<-0.5f))
-                {
-                    return;
-                }
-                else {
-                    tminY = Float.NEGATIVE_INFINITY;
-                    tmaxY = Float.POSITIVE_INFINITY;
-                }
-            }
-            else
-            {
-                float t1 = (-0.5f-rayObject.startPoint.y)/rayObject.direction.y;
-                float t2 = (0.5f-rayObject.startPoint.y)/rayObject.direction.y;
-                tminY = Math.min(t1,t2);
-                tmaxY = Math.max(t1,t2);
-            }
+    /*
+    If sphere centered at origi with r =1
+    a = vx^2 + vy^2 + vz^2
+    b = (vx*sx + vy*sy + vz * sz) * 2
+    c = sx^2 + sy^2 + sz^ 2 -1
 
-            if (Math.abs(rayObject.direction.z)<0.0001f)
-            {
-                if ((rayObject.startPoint.z>0.5f) || (rayObject.startPoint.z<-0.5f))
-                {
+    If its not...
+    b = 2vx(sx - cx) + 2vy(sy - cy) + 2vz(sz - cz)
+    c = (sx - cx)^2 + (sy - cy)^2 + (sz -cz)^2 - r^2
+     */
+    private void intersectSphere(Ray3D ray, Ray3D newRay, HitRecord hitRecord, Map<String, TextureImage> textureImageMap, Matrix4f worldToNode) {
+        float a = newRay.direction.lengthSquared();
+        float b = newRay.startPoint.dot(newRay.direction) * 2;
+        float c = newRay.startPoint.lengthSquared()-1 - 1;
+
+        // Quadratic formula
+        if ((Math.pow(b, 2) - 4 * a * c) >= 0) {
+            float t1 = (-b + (float)Math.sqrt(Math.pow(b, 2) - 4 * a * c)) / (2 * a);
+            float t2 = (-b - (float)Math.sqrt(Math.pow(b, 2) - 4 * a * c))/ (2 * a);
+
+            float t;
+
+            if (t1 >= 0) {
+                if (t2>=0) {
+                    t = Math.min(t1,t2);
+                } else {
+                    t = t1;
+                }
+            } else {
+                if (t2 >= 0) {
+                    t = t2;
+                } else {
                     return;
                 }
-                else {
-                    tminZ = Float.NEGATIVE_INFINITY;
-                    tmaxZ = Float.POSITIVE_INFINITY;
-                }
-            }
-            else
-            {
-                float t1 = (-0.5f-rayObject.startPoint.z)/rayObject.direction.z;
-                float t2 = (0.5f-rayObject.startPoint.z)/rayObject.direction.z;
-                tminZ = Math.min(t1,t2);
-                tmaxZ = Math.max(t1,t2);
             }
 
-            float tmin,tmax;
+            if (t < hitRecord.time) {
+                hitRecord.time = t;
+                hitRecord.startPoint = new Vector4f(ray.startPoint.x + t * ray.direction.x,
+                        ray.startPoint.y + t * ray.direction.y,ray.startPoint.z + t * ray.direction.z,1);
 
-            tmin = Math.max(tminX,Math.max(tminY,tminZ));
-            tmax = Math.min(tmaxX,Math.min(tmaxY,tmaxZ));
+                getNormalForSphere(newRay, hitRecord, t, worldToNode);
 
-            if ((tmin<tmax) && (tmax>0))
-            {
-                float t;
-                if (tmin>0)
-                    t = tmin;
-                else
-                    t = tmax;
+                hitRecord.setMaterial(material);
 
-                if (t<hitRecord.time) {
-                    hitRecord.time = t;
+                // Texture color
+                Vector4f textureColor = new Vector4f(1,1,1,1);
 
-                    hitRecord.startPoint = new Vector4f(ray.startPoint.x + t * ray.direction.x,
-                            ray.startPoint.y + t * ray.direction.y,
-                            ray.startPoint.z + t * ray.direction.z,
-                            1);
+                TextureImage textureImage = textureImageMap.get(textureName);
+                Vector4f start = newRay.startPoint;
+                Vector4f dir = newRay.direction;
 
-                    Vector4f pointInLeaf = new Vector4f(rayObject.startPoint.x + t * rayObject.direction.x,
-                            rayObject.startPoint.y + t * rayObject.direction.y,
-                            rayObject.startPoint.z + t * rayObject.direction.z,
-                            1);
+                Vector4f pointInNode = new Vector4f(start.x + dir.x * t, start.y + dir.y * t, start.z + dir.z * t, 1);
 
-                    if (Math.abs(pointInLeaf.x - 0.5f) < 0.001)
-                        hitRecord.normal.x = 1;
-                    else if (Math.abs(pointInLeaf.x + 0.5f) < 0.001)
-                        hitRecord.normal.x = -1;
-                    else
-                        hitRecord.normal.x = 0;
-
-                    if (Math.abs(pointInLeaf.y - 0.5f) < 0.001)
-                        hitRecord.normal.y = 1;
-                    else if (Math.abs(pointInLeaf.y + 0.5f) < 0.001)
-                        hitRecord.normal.y = -1;
-                    else
-                        hitRecord.normal.y = 0;
-
-                    if (Math.abs(pointInLeaf.z - 0.5f) < 0.001)
-                        hitRecord.normal.z = 1;
-                    else if (Math.abs(pointInLeaf.z + 0.5f) < 0.001)
-                        hitRecord.normal.z = -1;
-                    else
-                        hitRecord.normal.z = 0;
-
-                    hitRecord.normal.w = 0;
-                    hitRecord.normal.normalize();
-
-
-                    hitRecord.normal = new Matrix4f(viewToLeaf).transpose().transform(hitRecord.normal);
-                    hitRecord.normal = new Vector4f(new Vector3f(hitRecord
-                            .normal
-                            .x,hitRecord.normal.y,hitRecord.normal.z)
-                            .normalize(),0.0f);
-                    hitRecord.material = new util.Material(this.material);
-
-                    /**
-                     * start the texture color
-                     */
-                    Vector4f textureC = new Vector4f(1,1,1,1);
-
-                    TextureImage TI = textureImageMap.get(this.textureName);
-                    if (TI != null) {
-                        float boxX = pointInLeaf.x;
-                        float boxY = pointInLeaf.y;
-                        float boxZ = pointInLeaf.z;
-
-                        if (boxX<=0.51f && boxX>=-0.51f&& boxY<=0.51f && boxY>=-0.51f
-                                &&boxZ <=0.51f&&boxZ>=-0.51f) {
-                            // front: boxZ == 0.5
-                            if (Math.abs(boxZ - 0.5f) <= 0.001f) {
-                                // 4
-                                float imgX = 0.25f*(1f - (boxX + 0.5f)) + 0.75f;
-                                float imgY = 0.25f* (boxY + 0.5f)+0.5f;
-                                textureC = TI.getColor(imgX, imgY);
-                            }
-                            // back: boxZ == -0.5
-                            if (Math.abs(boxZ + 0.5f) <= 0.001f) {
-                                //2
-                                float imgX = 0.25f*(1f - (boxX + 0.5f)) + 0.25f;
-                                float imgY = 0.25f* (boxY + 0.5f)+0.5f;
-                                textureC = TI.getColor(imgX, imgY);
-                            }
-                            // right: x == 0.5
-                            if (Math.abs(boxX - 0.5f) <= 0.001f) {
-                                //3
-                                float imgX = (1f - (boxZ + 0.5f))*0.25f+0.5f;
-                                float imgY = (boxY + 0.5f)*0.25f+0.5f;
-                                textureC = TI.getColor(imgX, imgY);
-                            }
-                            // left: x == -0.5
-                            if (Math.abs(boxX + 0.5f) <= 0.001f) {
-                                // 1
-                                float imgX = (boxZ + 0.5f)*0.25f;
-                                float imgY = (boxY + 0.5f)*0.25f+0.5f;
-                                textureC = TI.getColor(imgX, imgY);
-                            }
-                            // top: y == 0.5
-                            if (Math.abs(boxY - 0.5f) <= 0.001f) {
-                                //5
-                                float imgX = (boxX + 0.5f)*0.25f + 0.25f;
-                                float imgY = (1f - (boxZ + 0.5f))*0.25f+0.25f;
-                                textureC = TI.getColor(imgX, imgY);
-                            }
-                            // bottom: y == -0.5
-                            if (Math.abs(boxY + 0.5f) <= 0.001f) {
-                                //6
-                                float imgX = (boxX + 0.5f)*0.25f+0.25f;
-                                float imgY = (boxZ + 0.5f)*0.25f - 0.25f;
-                                textureC = TI.getColor(imgX, imgY);
-                            }
-                            hitRecord.texture = textureC;
-                        }
-                    }
+                if (textureImage != null) {
+                    wrapSphere(pointInNode, textureColor, textureImage, hitRecord);
                 }
             }
 
         }
+    }
 
+    // Calculate normal vector for sphere
+    private void getNormalForSphere(Ray3D newRay, HitRecord hitRecord, float t, Matrix4f worldToNode) {
+        hitRecord.normal = new Vector4f(newRay.startPoint.x + t * newRay.direction.x,newRay.startPoint.y + t * newRay.direction.y,newRay.startPoint.z + t * newRay.direction.z,0);
+
+        hitRecord.normal = new Matrix4f(worldToNode).transpose().transform(hitRecord.normal);
+        hitRecord.normal = new Vector4f(new Vector3f(hitRecord.normal.x, hitRecord.normal.y, hitRecord.normal.z).normalize(),0);
+    }
+
+    // Wrap texture onto sphere coords
+    /*
+    0 <= theta <= 2PI
+    theta = tan^-1(z/x)
+     */
+    private void wrapSphere(Vector4f pointInNode, Vector4f textureColor, TextureImage textureImage, HitRecord hitRecord) {
+        // Sphere coords
+        float sx = pointInNode.x;
+        float sy = pointInNode.y;
+        float sz = pointInNode.z;
+
+        float phi = (float) Math.asin(sy);
+        phi = phi - (float) Math.PI / 2;
+        float theta = (float) Math.atan2((double) sz, (double) sx);
+        theta  = theta +(float) Math.PI;
+        float x = (float)(0.5f - (theta / (2 * Math.PI))) ;
+        float y = (1 - (phi / ((float) Math.PI)));
+
+        textureColor = textureImage.getColor(x, y);
+
+        hitRecord.setTexture(textureColor);
+    }
+
+    /*
+    From notes:
+    Need to find t such that s + tv
+    t = -(asx + bsy + csz + d) / (avx + bvy + cvz)
+
+    tx1 = (-0.5 - sx) / vx
+    tx2 = (-0.5 - sx) / vx
+    txMin = min(tx1, tx2)
+    txMax = mac(tx1, tx2)
+    .
+    .
+    .
+    same for y and z with corresponding "s" and "v"
+     */
+    private void intersectRect(Ray3D ray, Ray3D newRay, HitRecord hitRecord, Map<String, TextureImage> textureImageMap, Matrix4f worldToNode) {
+        float txMax,tyMax,tzMax;
+        float txMin,tyMin,tzMin;
+
+        // For each one, checkout again 0.0001f to avoid black specs on the object
+        if (Math.abs(newRay.direction.x) < 0.0001f) {
+            if ((newRay.startPoint.x > 0.5f) || (newRay.startPoint.x < -0.5f)) {
+                return;
+            } else {
+                txMin = Float.NEGATIVE_INFINITY;
+                txMax = Float.POSITIVE_INFINITY;
+            }
+
+        } else {
+            float t1 = (-0.5f - newRay.startPoint.x) / newRay.direction.x;
+            float t2 = (0.5f - newRay.startPoint.x) / newRay.direction.x;
+
+            txMin = Math.min(t1,t2);
+            txMax = Math.max(t1,t2);
+        }
+
+        if (Math.abs(newRay.direction.y) < 0.0001f) {
+            if ((newRay.startPoint.y > 0.5f) || (newRay.startPoint.y < -0.5f)) {
+                return;
+            } else {
+                tyMin = Float.NEGATIVE_INFINITY;
+                tyMax = Float.POSITIVE_INFINITY;
+            }
+        } else {
+            float t1 = (-0.5f - newRay.startPoint.y) / newRay.direction.y;
+            float t2 = (0.5f - newRay.startPoint.y) / newRay.direction.y;
+            tyMin = Math.min(t1,t2);
+            tyMax = Math.max(t1,t2);
+        }
+
+        if (Math.abs(newRay.direction.z) < 0.0001f) {
+            if ((newRay.startPoint.z>0.5f) || (newRay.startPoint.z<-0.5f)) {
+                return;
+            } else {
+                tzMin = Float.NEGATIVE_INFINITY;
+                tzMax = Float.POSITIVE_INFINITY;
+            }
+        } else {
+            float t1 = (-0.5f - newRay.startPoint.z) / newRay.direction.z;
+            float t2 = (0.5f - newRay.startPoint.z) / newRay.direction.z;
+            tzMin = Math.min(t1,t2);
+            tzMax = Math.max(t1,t2);
+        }
+
+        float minT, maxT;
+
+        minT = Math.max(txMin, Math.max(tyMin, tzMin));
+        maxT = Math.min(txMax, Math.min(tyMax, tzMax));
+
+        if ((minT < maxT) && (maxT > 0)) {
+            float t;
+            if (minT > 0) {
+                t = minT;
+            } else {
+                t = maxT;
+            }
+
+            if (t < hitRecord.time) {
+                hitRecord.time = t;
+
+                hitRecord.startPoint = new Vector4f(ray.startPoint.x + t * ray.direction.x,
+                        ray.startPoint.y + t * ray.direction.y,
+                        ray.startPoint.z + t * ray.direction.z,
+                        1);
+
+                Vector4f pointInNode = new Vector4f(newRay.startPoint.x + t * newRay.direction.x,
+                        newRay.startPoint.y + t * newRay.direction.y,
+                        newRay.startPoint.z + t * newRay.direction.z,
+                        1);
+
+                // Set the normal vector here
+                getNormalForBox(pointInNode, hitRecord, worldToNode);
+
+                hitRecord.setMaterial(material);
+
+                // Texture color
+                Vector4f textureColor = new Vector4f(1,1,1,1);
+
+                TextureImage textureImage = textureImageMap.get(textureName);
+
+                if (textureImage != null) {
+                    // Go through each face of the cube and wrap the texture coords
+                    wrapFaces(pointInNode, textureColor, textureImage, hitRecord);
+                }
+            }
+        }
+    }
+
+    private void getNormalForBox(Vector4f pointInNode, HitRecord hitRecord, Matrix4f worldToNode) {
+        if (Math.abs(pointInNode.x - 0.5f) < 0.001) {
+            hitRecord.normal.x = 1;
+
+        } else if (Math.abs(pointInNode.x + 0.5f) < 0.001) {
+            hitRecord.normal.x = -1;
+        } else {
+            hitRecord.normal.x = 0;
+        }
+
+        if (Math.abs(pointInNode.y - 0.5f) < 0.001) {
+            hitRecord.normal.y = 1;
+        } else if (Math.abs(pointInNode.y + 0.5f) < 0.001) {
+            hitRecord.normal.y = -1;
+        } else {
+            hitRecord.normal.y = 0;
+        }
+
+        if (Math.abs(pointInNode.z - 0.5f) < 0.001) {
+            hitRecord.normal.z = 1;
+        } else if (Math.abs(pointInNode.z + 0.5f) < 0.001) {
+            hitRecord.normal.z = -1;
+        } else {
+            hitRecord.normal.z = 0;
+        }
+
+        hitRecord.normal.w = 0;
+        hitRecord.normal.normalize();
+
+
+        hitRecord.normal = new Matrix4f(worldToNode).transpose().transform(hitRecord.normal);
+        hitRecord.normal = new Vector4f(new Vector3f(hitRecord.normal.x,hitRecord.normal.y,hitRecord.normal.z).normalize(),0);
+    }
+
+    private void wrapFaces(Vector4f pointInNode, Vector4f textureColor, TextureImage textureImage, HitRecord hitRecord) {
+        float bx = pointInNode.x;
+        float by = pointInNode.y;
+        float bz = pointInNode.z;
+
+        if (bx <= 0.51f && bx >= -0.51f && by <= 0.51f && by >= -0.51f && bz <= 0.51f && bz >= -0.51f) {
+            // front face
+            if (Math.abs(bz - 0.5f) <= 0.001f) {
+                float imgX = 0.25f * (1f - (bx + 0.5f)) + 0.75f;
+                float imgY = 0.25f * (by + 0.5f) + 0.5f;
+                textureColor = textureImage.getColor(imgX, imgY);
+            }
+            // back face
+            if (Math.abs(bz + 0.5f) <= 0.001f) {
+                float imgX = 0.25f * (1f - (bx + 0.5f)) + 0.25f;
+                float imgY = 0.25f * (by + 0.5f) + 0.5f;
+                textureColor = textureImage.getColor(imgX, imgY);
+            }
+            // right face
+            if (Math.abs(bx - 0.5f) <= 0.001f) {
+                float imgX = (1f - (bz + 0.5f)) * 0.25f + 0.5f;
+                float imgY = (by + 0.5f) * 0.25f + 0.5f;
+                textureColor = textureImage.getColor(imgX, imgY);
+            }
+            // left face
+            if (Math.abs(bx + 0.5f) <= 0.001f) {
+                float imgX = (bz + 0.5f) * 0.25f;
+                float imgY = (by + 0.5f) * 0.25f + 0.5f;
+                textureColor = textureImage.getColor(imgX, imgY);
+            }
+            // top face
+            if (Math.abs(by - 0.5f) <= 0.001f) {
+                float imgX = (bx + 0.5f) * 0.25f + 0.25f;
+                float imgY = (1f - (bz + 0.5f)) * 0.25f+0.25f;
+                textureColor = textureImage.getColor(imgX, imgY);
+            }
+            // bottom face
+            if (Math.abs(by + 0.5f) <= 0.001f) {
+                float imgX = (bx + 0.5f) * 0.25f + 0.25f;
+                float imgY = (bz + 0.5f) * 0.25f - 0.25f;
+                textureColor = textureImage.getColor(imgX, imgY);
+            }
+
+            hitRecord.setTexture(textureColor);
+        }
     }
 
     /*
