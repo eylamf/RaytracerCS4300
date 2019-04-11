@@ -188,6 +188,7 @@ public class LeafNode extends AbstractNode
     .
     same for y and z with corresponding "s" and "v"
      */
+    // TODO figure out why box at bottom of scene doesn't map correctly
     private void intersectRect(Ray3D ray, Ray3D newRay, HitRecord hitRecord, Map<String, TextureImage> textureImageMap, Matrix4f worldToNode) {
         float txMax;
         float tyMax;
