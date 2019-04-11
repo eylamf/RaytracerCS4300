@@ -95,8 +95,7 @@ public class Scenegraph<VertexType extends IVertexData> implements IScenegraph<V
   @Override
   public void draw(Stack<Matrix4f> modelView) {
     if ((root != null) && (renderer != null)) {
-      List<Light> listOfLights = root.getLightsInView(modelView);
-      renderer.initLightsInShader(listOfLights);
+
       renderer.draw(root, modelView);
     }
   }

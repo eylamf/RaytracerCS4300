@@ -4,9 +4,9 @@ import org.joml.Vector4f;
 import util.Material;
 
 public class HitRecord {
-    private float time;
-    private Vector4f startPoint, normal, texture;
-    private Material material;
+    public float time;
+    public Vector4f startPoint, normal, texture;
+    public Material material;
 
     public HitRecord() {
         time = Float.MAX_VALUE;
@@ -25,27 +25,27 @@ public class HitRecord {
     }
 
     public Vector4f getStartPoint() {
-        return new Vector4f(this.startPoint);
+        return this.startPoint;
     }
 
     public void setStartPoint(Vector4f sp) {
-        this.startPoint = new Vector4f(sp.x, sp.y, sp.z, sp.w);
+        this.startPoint = sp;
     }
 
     public Vector4f getNormal() {
-        return new Vector4f(this.normal);
+        return this.normal;
     }
 
     public void setNormal(Vector4f n) {
-        this.normal = new Vector4f(n.x, n.y, n.z, n.w);
+        this.normal = n;
     }
 
     public Vector4f getTexture() {
-        return new Vector4f(this.texture);
+        return texture;
     }
 
     public void setTexture(Vector4f text) {
-        this.texture = new Vector4f(text);
+        this.texture = text;
     }
 
     public Material getMaterial() {

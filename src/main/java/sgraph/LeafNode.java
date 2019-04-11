@@ -60,252 +60,275 @@ public class LeafNode extends AbstractNode
 
     @Override
     public void intersect(Ray3D ray, Stack<Matrix4f> mv, HitRecord hitRecord, Map<String, TextureImage> textureImageMap) {
-        Ray3D newRay = new Ray3D(ray);
-        Matrix4f leaf = new Matrix4f(mv.peek());
-        Matrix4f view = new Matrix4f(leaf).invert();
+        Ray3D rayObject = new Ray3D();
+        Matrix4f leafToView = new Matrix4f(mv.peek());
+        Matrix4f viewToLeaf = new Matrix4f(leafToView).invert();
+        rayObject.startPoint = new Vector4f(ray.startPoint);
+        rayObject.direction = new Vector4f(ray.direction);
 
-        newRay.setStartPoint(view.transform(newRay.getStartPoint()));
-        newRay.setDirection(view.transform(newRay.getDirection()));
+        rayObject.startPoint = viewToLeaf.transform(rayObject.startPoint);
+        rayObject.direction = viewToLeaf.transform(rayObject.direction);
 
-        if (objInstanceName.equals("box") || objInstanceName.equals("box-outside")) {
-            float txMax, tyMax, tzMax;
-            float txMin, tyMin, tzMin;
 
-            // Check again 0.0001f to avoid black specs on objects
-            if (Math.abs(newRay.getDirection().x) < 0.0001f) {
-                if (newRay.getStartPoint().x > 0.5f || newRay.getStartPoint().x < -0.5f) {
-                    return;
-                } else {
-                    txMin = -1 * Float.MAX_VALUE;
-                    txMax = Float.MAX_VALUE;
+        if (objInstanceName.equals("sphere"))
+        {
+            float a,b,c;
+
+            a = rayObject.direction.lengthSquared();
+            b = 2*rayObject.startPoint.dot(rayObject.direction);
+            c = rayObject.startPoint.lengthSquared()-1 - 1;
+
+            if ((b*b-4*a*c)>=0)
+            {
+                float t1 = (-b+(float)Math.sqrt(b*b-4*a*c))/(2*a);
+                float t2 = (-b-(float)Math.sqrt(b*b-4*a*c))/(2*a);
+
+                float t;
+                if (t1>=0)
+                {
+                    if (t2>=0)
+                    {
+                        t = Math.min(t1,t2);
+                    }
+                    else {
+                        t = t1;
+                    }
                 }
-            } else {
-                float t = (-0.5f - newRay.getStartPoint().x) / newRay.getDirection().x;
-                float t2 = (0.5f - newRay.getStartPoint().x) / newRay.getDirection().x;
+                else
+                {
+                    if (t2>=0)
+                        t = t2;
+                    else
+                        return;
+                }
 
-                txMin = Math.min(t, t2);
-                txMax = Math.max(t, t2);
+                if (t<hitRecord.time)
+                {
+                    hitRecord.time = t;
+                    hitRecord.startPoint = new Vector4f(ray.startPoint.x+t*ray.direction.x,
+                            ray.startPoint.y+t*ray.direction.y,
+                            ray.startPoint.z+t*ray.direction.z,
+                            1);
+                    hitRecord.normal = new Vector4f(rayObject.startPoint.x+t*rayObject.direction.x,
+                            rayObject.startPoint.y+t*rayObject.direction.y,
+                            rayObject.startPoint.z+t*rayObject.direction.z,
+                            0);
+
+                    hitRecord.normal = new Matrix4f(viewToLeaf).transpose().transform(hitRecord.normal);
+                    hitRecord.normal = new Vector4f(new Vector3f(hitRecord
+                            .normal
+                            .x,hitRecord.normal.y,hitRecord.normal.z)
+                            .normalize(),0.0f);
+                    hitRecord.material = new util.Material(this.material);
+
+
+                    /**
+                     * start the texture color in sphere
+                     */
+                    Vector4f textureC = new Vector4f(1,1,1,1);
+
+                    TextureImage TI = textureImageMap.get(this.textureName);
+                    Vector4f start = rayObject.startPoint;
+                    Vector4f dir = rayObject.direction;
+                    Vector4f pointInLeaf =
+                            new Vector4f(start.x+dir.x*t, start.y+dir.y*t, start.z+dir.z*t, 1);
+                    if (TI != null) {
+                        float sphereX = pointInLeaf.x;
+                        float sphereY = pointInLeaf.y;
+                        float sphereZ = pointInLeaf.z;
+                        float phi = (float) Math.asin(sphereY);
+                        phi = phi - (float) Math.PI / 2;
+                        float theta = (float) Math.atan2((double) sphereZ, (double) sphereX);
+                        theta  = theta +(float) Math.PI;
+                        float x = (float)(0.5-(theta / (2f * Math.PI))) ;
+                        float y = (1 - (phi / ((float) Math.PI)));
+                        textureC = TI.getColor(x, y);
+                        hitRecord.texture = textureC;
+
+                    }
+                }
+
+            }
+        }
+        else if (objInstanceName.equals("box") || objInstanceName.equals("box-outside"))
+        {
+            float tmaxX,tmaxY,tmaxZ;
+            float tminX,tminY,tminZ;
+
+            if (Math.abs(rayObject.direction.x)<0.0001f)
+            {
+                if ((rayObject.startPoint.x>0.5f) || (rayObject.startPoint.x<-0.5f))
+                    return;
+                else {
+                    tminX = Float.NEGATIVE_INFINITY;
+                    tmaxX = Float.POSITIVE_INFINITY;
+                }
+            }
+            else
+            {
+                float t1 = (-0.5f-rayObject.startPoint.x)/rayObject.direction.x;
+                float t2 = (0.5f-rayObject.startPoint.x)/rayObject.direction.x;
+                tminX = Math.min(t1,t2);
+                tmaxX = Math.max(t1,t2);
             }
 
-            if (Math.abs(newRay.getDirection().y) < 0.0001f) {
-                if (newRay.getStartPoint().y > 0.5f || newRay.getStartPoint().y < -0.5f) {
+            if (Math.abs(rayObject.direction.y)<0.0001f)
+            {
+                if ((rayObject.startPoint.y>0.5f) || (rayObject.startPoint.y<-0.5f))
+                {
                     return;
-                } else {
-                    tyMin = -1 * Float.MAX_VALUE;
-                    tyMax = Float.MAX_VALUE;
                 }
-            } else {
-                float t = (-0.5f - newRay.getStartPoint().y) / newRay.getDirection().y;
-                float t2 = (0.5f - newRay.getStartPoint().y) / newRay.getDirection().y;
-
-                tyMin = Math.min(t, t2);
-                tyMax = Math.max(t, t2);
+                else {
+                    tminY = Float.NEGATIVE_INFINITY;
+                    tmaxY = Float.POSITIVE_INFINITY;
+                }
+            }
+            else
+            {
+                float t1 = (-0.5f-rayObject.startPoint.y)/rayObject.direction.y;
+                float t2 = (0.5f-rayObject.startPoint.y)/rayObject.direction.y;
+                tminY = Math.min(t1,t2);
+                tmaxY = Math.max(t1,t2);
             }
 
-            if (Math.abs(newRay.getDirection().z) < 0.0001f) {
-                if (newRay.getStartPoint().z > 0.5f || newRay.getStartPoint().z < -0.5f) {
+            if (Math.abs(rayObject.direction.z)<0.0001f)
+            {
+                if ((rayObject.startPoint.z>0.5f) || (rayObject.startPoint.z<-0.5f))
+                {
                     return;
-                } else {
-                    tzMin = -1 * Float.MAX_VALUE;
-                    tzMax = Float.MAX_VALUE;
                 }
-            } else {
-                float t = (-0.5f - newRay.getStartPoint().z) / newRay.getDirection().z;
-                float t2 = (0.5f - newRay.getStartPoint().z) / newRay.getDirection().z;
-
-                tzMin = Math.min(t, t2);
-                tzMax = Math.max(t, t2);
+                else {
+                    tminZ = Float.NEGATIVE_INFINITY;
+                    tmaxZ = Float.POSITIVE_INFINITY;
+                }
+            }
+            else
+            {
+                float t1 = (-0.5f-rayObject.startPoint.z)/rayObject.direction.z;
+                float t2 = (0.5f-rayObject.startPoint.z)/rayObject.direction.z;
+                tminZ = Math.min(t1,t2);
+                tmaxZ = Math.max(t1,t2);
             }
 
-            float minT, maxT;
+            float tmin,tmax;
 
-            minT = Math.max(txMin, Math.max(tyMin, tzMin));
-            maxT = Math.min(txMax, Math.max(tyMax, tzMax));
+            tmin = Math.max(tminX,Math.max(tminY,tminZ));
+            tmax = Math.min(tmaxX,Math.min(tmaxY,tmaxZ));
 
-            if (minT < maxT && maxT > 0) {
-                float t = maxT;
+            if ((tmin<tmax) && (tmax>0))
+            {
+                float t;
+                if (tmin>0)
+                    t = tmin;
+                else
+                    t = tmax;
 
-                if (minT > 0) {
-                    t = minT;
-                }
+                if (t<hitRecord.time) {
+                    hitRecord.time = t;
 
-                if (t < hitRecord.getT()) {
-                    hitRecord.setT(t);
+                    hitRecord.startPoint = new Vector4f(ray.startPoint.x + t * ray.direction.x,
+                            ray.startPoint.y + t * ray.direction.y,
+                            ray.startPoint.z + t * ray.direction.z,
+                            1);
 
-                    Vector4f point = new Vector4f(ray.getStartPoint().x + t * ray.getDirection().x,
-                            ray.getStartPoint().y + t * ray.getDirection().y,
-                            ray.getStartPoint().z + t * ray.getDirection().z, 1);
-                    hitRecord.setStartPoint(point);
+                    Vector4f pointInLeaf = new Vector4f(rayObject.startPoint.x + t * rayObject.direction.x,
+                            rayObject.startPoint.y + t * rayObject.direction.y,
+                            rayObject.startPoint.z + t * rayObject.direction.z,
+                            1);
 
-                    Vector4f pointAtLeaf = new Vector4f(newRay.getStartPoint().x + t * newRay.getDirection().x,
-                            newRay.getStartPoint().y + t * newRay.getDirection().y,
-                            newRay.getStartPoint().z + t * newRay.getDirection().z, 1);
+                    if (Math.abs(pointInLeaf.x - 0.5f) < 0.001)
+                        hitRecord.normal.x = 1;
+                    else if (Math.abs(pointInLeaf.x + 0.5f) < 0.001)
+                        hitRecord.normal.x = -1;
+                    else
+                        hitRecord.normal.x = 0;
 
-                    Vector4f normal = new Vector4f(hitRecord.getNormal());
+                    if (Math.abs(pointInLeaf.y - 0.5f) < 0.001)
+                        hitRecord.normal.y = 1;
+                    else if (Math.abs(pointInLeaf.y + 0.5f) < 0.001)
+                        hitRecord.normal.y = -1;
+                    else
+                        hitRecord.normal.y = 0;
 
-                    // x
-                    if (Math.abs(pointAtLeaf.x - 0.5f) < 0.001f) {
-                        normal.x = 1;
-                    } else if (Math.abs(pointAtLeaf.x + 0.5f) < 0.001f) {
-                        normal.x = -1;
-                    } else {
-                        normal.x = 0;
-                    }
-                    // y
-                    if (Math.abs(pointAtLeaf.y - 0.5f) < 0.001f) {
-                        normal.y = 1;
-                    } else if (Math.abs(pointAtLeaf.y + 0.5f) < 0.001f) {
-                        normal.y = -1;
-                    } else {
-                        normal.y = 0;
-                    }
-                    // z
-                    if (Math.abs(pointAtLeaf.z - 0.5f) < 0.001f) {
-                        normal.z = 1;
-                    } else if (Math.abs(pointAtLeaf.z + 0.5f) < 0.001f) {
-                        normal.z = -1;
-                    } else {
-                        normal.z = 0;
-                    }
+                    if (Math.abs(pointInLeaf.z - 0.5f) < 0.001)
+                        hitRecord.normal.z = 1;
+                    else if (Math.abs(pointInLeaf.z + 0.5f) < 0.001)
+                        hitRecord.normal.z = -1;
+                    else
+                        hitRecord.normal.z = 0;
 
-                    normal.w = 0;
-                    normal = normal.normalize();
+                    hitRecord.normal.w = 0;
+                    hitRecord.normal.normalize();
 
-                    normal = new Matrix4f(view).transpose().transform(normal);
-                    normal = new Vector4f(new Vector3f(normal.x, normal.y, normal.z).normalize(), 0);
 
-                    hitRecord.setNormal(normal);
+                    hitRecord.normal = new Matrix4f(viewToLeaf).transpose().transform(hitRecord.normal);
+                    hitRecord.normal = new Vector4f(new Vector3f(hitRecord
+                            .normal
+                            .x,hitRecord.normal.y,hitRecord.normal.z)
+                            .normalize(),0.0f);
+                    hitRecord.material = new util.Material(this.material);
 
-                    hitRecord.setMaterial(new Material(material));
+                    /**
+                     * start the texture color
+                     */
+                    Vector4f textureC = new Vector4f(1,1,1,1);
 
-                    // Color for texture
-                    Vector4f textureColor = new Vector4f(1, 1, 1, 1);
+                    TextureImage TI = textureImageMap.get(this.textureName);
+                    if (TI != null) {
+                        float boxX = pointInLeaf.x;
+                        float boxY = pointInLeaf.y;
+                        float boxZ = pointInLeaf.z;
 
-                    TextureImage textureImage = textureImageMap.get(textureName);
-
-                    // Map textureImage coords correctly
-                    if (textureImage != null) {
-                        float boxX = pointAtLeaf.x;
-                        float boxY = pointAtLeaf.y;
-                        float boxZ = pointAtLeaf.z;
-
-                        if (boxX <= 0.51f && boxX >= -0.51f && boxY <= 0.51f && boxY >= -0.5f && boxZ <= 0.51f && boxZ >= -0.51f) {
-                            // front
+                        if (boxX<=0.51f && boxX>=-0.51f&& boxY<=0.51f && boxY>=-0.51f
+                                &&boxZ <=0.51f&&boxZ>=-0.51f) {
+                            // front: boxZ == 0.5
                             if (Math.abs(boxZ - 0.5f) <= 0.001f) {
-                                float imgX = 0.25f * (1f - (boxX + 0.5f)) + 0.75f;
-                                float imgY = 0.25f * (boxY + 0.5f) + 0.5f;
-                                textureColor = textureImage.getColor(imgX, imgY);
+                                // 4
+                                float imgX = 0.25f*(1f - (boxX + 0.5f)) + 0.75f;
+                                float imgY = 0.25f* (boxY + 0.5f)+0.5f;
+                                textureC = TI.getColor(imgX, imgY);
                             }
-
-                            // back
+                            // back: boxZ == -0.5
                             if (Math.abs(boxZ + 0.5f) <= 0.001f) {
-                                float imgX = 0.25f * (1f - (boxX + 0.5f)) + 0.25f;
-                                float imgY = 0.25f * (boxY + 0.5f) + 0.5f;
-                                textureColor = textureImage.getColor(imgX, imgY);
+                                //2
+                                float imgX = 0.25f*(1f - (boxX + 0.5f)) + 0.25f;
+                                float imgY = 0.25f* (boxY + 0.5f)+0.5f;
+                                textureC = TI.getColor(imgX, imgY);
                             }
-
-                            // right
+                            // right: x == 0.5
                             if (Math.abs(boxX - 0.5f) <= 0.001f) {
-                                float imgX = (1f - (boxZ + 0.5f)) * 0.25f + 0.5f;
-                                float imgY = (boxY + 0.5f) * 0.25f + 0.5f;
-                                textureColor = textureImage.getColor(imgX, imgY);
+                                //3
+                                float imgX = (1f - (boxZ + 0.5f))*0.25f+0.5f;
+                                float imgY = (boxY + 0.5f)*0.25f+0.5f;
+                                textureC = TI.getColor(imgX, imgY);
                             }
-                            // left
+                            // left: x == -0.5
                             if (Math.abs(boxX + 0.5f) <= 0.001f) {
                                 // 1
                                 float imgX = (boxZ + 0.5f)*0.25f;
                                 float imgY = (boxY + 0.5f)*0.25f+0.5f;
-                                textureColor = textureImage.getColor(imgX, imgY);
+                                textureC = TI.getColor(imgX, imgY);
                             }
                             // top: y == 0.5
                             if (Math.abs(boxY - 0.5f) <= 0.001f) {
                                 //5
                                 float imgX = (boxX + 0.5f)*0.25f + 0.25f;
                                 float imgY = (1f - (boxZ + 0.5f))*0.25f+0.25f;
-                                textureColor = textureImage.getColor(imgX, imgY);
+                                textureC = TI.getColor(imgX, imgY);
                             }
                             // bottom: y == -0.5
                             if (Math.abs(boxY + 0.5f) <= 0.001f) {
                                 //6
                                 float imgX = (boxX + 0.5f)*0.25f+0.25f;
                                 float imgY = (boxZ + 0.5f)*0.25f - 0.25f;
-                                textureColor = textureImage.getColor(imgX, imgY);
+                                textureC = TI.getColor(imgX, imgY);
                             }
-
-                            hitRecord.setTexture(textureColor);
+                            hitRecord.texture = textureC;
                         }
                     }
-
                 }
             }
-        } else if (objInstanceName.equals("sphere")) {
-            float a = newRay.getDirection().lengthSquared();
-            float b = 2 * newRay.getStartPoint().dot(newRay.getDirection());
-            float c = newRay.getStartPoint().lengthSquared() - 2;
 
-            // Quadratic
-            if ((Math.pow(b, 2) - 4 * a * c) >= 0) {
-                float t = (-b + (float) Math.sqrt(Math.pow(b, 2) - 4 * a * c)) / (2 * a);
-                float t2 = (-b - (float) Math.sqrt(Math.pow(b, 2) - 4 * a * c)) / (2 * a);
-
-                float finalT;
-
-                if (t >= 0) {
-                    if (t2 >= 0) {
-                        finalT = Math.min(t, t2);
-                    } else {
-                        finalT = t;
-                    }
-                } else {
-                    if (t2 >= 0) {
-                        finalT = t2;
-                    } else {
-                        return;
-                    }
-                }
-
-                if (finalT < hitRecord.getT()) {
-                    hitRecord.setT(finalT);
-
-                    Vector4f point = new Vector4f(ray.getStartPoint().x + finalT * ray.getDirection().x,
-                            ray.getStartPoint().y + finalT * ray.getDirection().y,
-                            ray.getStartPoint().z + finalT * ray.getDirection().z, 1);
-                    hitRecord.setStartPoint(point);
-
-                    Vector4f normal = new Vector4f(
-                      newRay.getStartPoint().x + finalT * newRay.getDirection().x,
-                            newRay.getStartPoint().y + finalT * newRay.getDirection().y,
-                            newRay.getStartPoint().z + finalT * newRay.getDirection().z, 0);
-
-                    normal = new Matrix4f(view).transpose().transform(normal);
-                    normal = new Vector4f(new Vector3f(normal.x, normal.y, normal.z).normalize(), 0);
-
-                    hitRecord.setNormal(normal);
-
-                    hitRecord.setMaterial(new Material(material));
-
-                    // Texture color
-                    Vector4f textureColor = new Vector4f(1, 1, 1, 1);
-                    TextureImage textureImage = textureImageMap.get(textureName);
-                    Vector4f sp = newRay.getStartPoint();
-                    Vector4f dir = newRay.getDirection();
-                    Vector4f pointAtLeaf = new Vector4f(sp.x + dir.x * finalT, sp.y + dir.y * finalT, sp.z + dir.z * finalT, 1);
-
-                    if (textureImage != null) {
-                        float sphereX = pointAtLeaf.x;
-                        float sphereY = pointAtLeaf.y;
-                        float sphereZ = pointAtLeaf.z;
-                        float phi = (float) Math.asin(sphereY);
-                        phi = phi - (float) Math.PI / 2;
-                        float theta = (float) Math.atan2((double) sphereZ, (double) sphereX);
-                        theta = theta + (float) Math.PI;
-                        float x = (float) (0.5 - (theta / (2 * Math.PI)));
-                        float y = (1 - (phi / ((float) Math.PI)));
-                        textureColor = textureImage.getColor(x, y);
-                        hitRecord.setTexture(textureColor);
-                    }
-                }
-            }
         }
 
     }

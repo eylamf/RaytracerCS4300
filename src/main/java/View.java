@@ -38,8 +38,7 @@ public class View {
 
   // Raytracer
   private boolean isRaytraceOn;
-  private IScenegraphRenderer normalRenderer;
-  private IScenegraphRenderer raytracerRenderer;
+  private IScenegraphRenderer normalRenderer, raytracerRenderer;
 
 
   public View() {
@@ -113,7 +112,6 @@ public class View {
       raytrace();
       isRaytraceOn = false;
     } else {
-
       drawNormal(gla);
     }
   }
@@ -207,11 +205,21 @@ public class View {
   }
 
   public void turnRaytraceOn() {
-    isRaytraceOn = true;
+    this.isRaytraceOn = true;
   }
 
   public void raytrace() {
     System.out.println("STARTED RAYTRACE");
+    Stack<Matrix4f> mv = new Stack();
+
+    while (!mv.empty()) {
+      mv.pop();
+    }
+
+
+    mv.push(new Matrix4f());
+    mv.peek().lookAt(new Vector3f(new Vector3f(150, 150, 150)), new Vector3f(0, 0, 0), new Vector3f(0, 1, 0))
+            .mul(trackballTransform);
 
     try {
       scenegraph.setRenderer(raytracerRenderer);
@@ -219,8 +227,8 @@ public class View {
       System.out.println("Failed to set renderer");
     }
 
-    scenegraph.draw(modelView);
-    modelView.pop();
+    scenegraph.draw(mv);
+    mv.pop();
 
     try {
       normalRenderer = null;

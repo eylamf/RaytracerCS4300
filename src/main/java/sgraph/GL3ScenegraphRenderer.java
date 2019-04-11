@@ -146,6 +146,10 @@ public class GL3ScenegraphRenderer implements IScenegraphRenderer {
   @Override
   public void draw(INode root, Stack<Matrix4f> modelView) {
     GL3 gl = glContext.getGL().getGL3();
+
+    List<Light> listOfLights = root.getLightsInView(modelView);
+    initLightsInShader(listOfLights);
+
     gl.glEnable(GL.GL_TEXTURE_2D);
     gl.glActiveTexture(GL.GL_TEXTURE1);
     int loc = -1;

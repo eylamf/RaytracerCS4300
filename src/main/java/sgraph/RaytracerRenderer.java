@@ -260,7 +260,7 @@ public class RaytracerRenderer implements IScenegraphRenderer {
 
     @Override
     public void initLightsInShader(List<Light> lights) {
-//        throw new IllegalArgumentException("WRONG RENDERER");
+        throw new IllegalArgumentException("WRONG RENDERER");
     }
 
     @Override
