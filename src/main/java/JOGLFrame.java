@@ -22,7 +22,7 @@ public class JOGLFrame extends JFrame {
   public JOGLFrame(String title) {
     //routine JFrame setting stuff
     super(title);
-    setSize(800, 800); //this opens a 400x400 window
+    setSize(500, 500); //this opens a 400x400 window
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //when X is pressed, close program
 
     //Our View class is the actual driver of the OpenGL stuff

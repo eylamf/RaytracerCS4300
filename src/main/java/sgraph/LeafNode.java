@@ -61,7 +61,9 @@ public class LeafNode extends AbstractNode
     @Override
     public void intersect(Ray3D ray, Stack<Matrix4f> mv, HitRecord hitRecord, Map<String, TextureImage> textureImageMap) {
         Ray3D newRay = new Ray3D();
+
         Matrix4f nodeToWorld = new Matrix4f(mv.peek());
+
         Matrix4f worldToNode = new Matrix4f(nodeToWorld).invert();
 
         newRay.startPoint = new Vector4f(ray.startPoint);
@@ -187,16 +189,20 @@ public class LeafNode extends AbstractNode
     same for y and z with corresponding "s" and "v"
      */
     private void intersectRect(Ray3D ray, Ray3D newRay, HitRecord hitRecord, Map<String, TextureImage> textureImageMap, Matrix4f worldToNode) {
-        float txMax,tyMax,tzMax;
-        float txMin,tyMin,tzMin;
+        float txMax;
+        float tyMax;
+        float tzMax;
+        float txMin;
+        float tyMin;
+        float tzMin;
 
         // For each one, checkout again 0.0001f to avoid black specs on the object
         if (Math.abs(newRay.direction.x) < 0.0001f) {
-            if ((newRay.startPoint.x > 0.5f) || (newRay.startPoint.x < -0.5f)) {
-                return;
+            if ((newRay.startPoint.x <= 0.5f) || (newRay.startPoint.x >= -0.5f)) {
+                txMin = -Float.MAX_VALUE;
+                txMax = Float.MAX_VALUE;
             } else {
-                txMin = Float.NEGATIVE_INFINITY;
-                txMax = Float.POSITIVE_INFINITY;
+                return;
             }
 
         } else {
@@ -208,11 +214,11 @@ public class LeafNode extends AbstractNode
         }
 
         if (Math.abs(newRay.direction.y) < 0.0001f) {
-            if ((newRay.startPoint.y > 0.5f) || (newRay.startPoint.y < -0.5f)) {
-                return;
+            if ((newRay.startPoint.y <= 0.5f) || (newRay.startPoint.y >= -0.5f)) {
+                tyMin = -Float.MAX_VALUE;
+                tyMax = Float.MAX_VALUE;
             } else {
-                tyMin = Float.NEGATIVE_INFINITY;
-                tyMax = Float.POSITIVE_INFINITY;
+                return;
             }
         } else {
             float t1 = (-0.5f - newRay.startPoint.y) / newRay.direction.y;
@@ -222,11 +228,11 @@ public class LeafNode extends AbstractNode
         }
 
         if (Math.abs(newRay.direction.z) < 0.0001f) {
-            if ((newRay.startPoint.z>0.5f) || (newRay.startPoint.z<-0.5f)) {
-                return;
-            } else {
+            if ((newRay.startPoint.z <= 0.5f) || (newRay.startPoint.z >= -0.5f)) {
                 tzMin = Float.NEGATIVE_INFINITY;
                 tzMax = Float.POSITIVE_INFINITY;
+            } else {
+                return;
             }
         } else {
             float t1 = (-0.5f - newRay.startPoint.z) / newRay.direction.z;
@@ -331,18 +337,6 @@ public class LeafNode extends AbstractNode
                 float imgY = 0.25f * (by + 0.5f) + 0.5f;
                 textureColor = textureImage.getColor(imgX, imgY);
             }
-            // right face
-            if (Math.abs(bx - 0.5f) <= 0.001f) {
-                float imgX = (1f - (bz + 0.5f)) * 0.25f + 0.5f;
-                float imgY = (by + 0.5f) * 0.25f + 0.5f;
-                textureColor = textureImage.getColor(imgX, imgY);
-            }
-            // left face
-            if (Math.abs(bx + 0.5f) <= 0.001f) {
-                float imgX = (bz + 0.5f) * 0.25f;
-                float imgY = (by + 0.5f) * 0.25f + 0.5f;
-                textureColor = textureImage.getColor(imgX, imgY);
-            }
             // top face
             if (Math.abs(by - 0.5f) <= 0.001f) {
                 float imgX = (bx + 0.5f) * 0.25f + 0.25f;
@@ -353,6 +347,19 @@ public class LeafNode extends AbstractNode
             if (Math.abs(by + 0.5f) <= 0.001f) {
                 float imgX = (bx + 0.5f) * 0.25f + 0.25f;
                 float imgY = (bz + 0.5f) * 0.25f - 0.25f;
+                textureColor = textureImage.getColor(imgX, imgY);
+            }
+
+            // right face
+            if (Math.abs(bx - 0.5f) <= 0.001f) {
+                float imgX = (1f - (bz + 0.5f)) * 0.25f + 0.5f;
+                float imgY = (by + 0.5f) * 0.25f + 0.5f;
+                textureColor = textureImage.getColor(imgX, imgY);
+            }
+            // left face
+            if (Math.abs(bx + 0.5f) <= 0.001f) {
+                float imgX = (bz + 0.5f) * 0.25f;
+                float imgY = (by + 0.5f) * 0.25f + 0.5f;
                 textureColor = textureImage.getColor(imgX, imgY);
             }
 
