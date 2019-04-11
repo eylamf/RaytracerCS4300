@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8bf3d1c5-f58a-4346-9739-e59e13b36e52" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/sgraph/LeafNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/sgraph/LeafNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/sgraph/LeafNode.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/sgraph/LeafNode.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/View.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/View.java" afterDir="false" />
     </list>
     <ignored path="ScenegraphsLightsTextures.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -76,23 +74,31 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/View.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2094">
-              <caret line="237" selection-start-line="237" selection-end-line="237" />
+            <state relative-caret-position="112">
+              <caret line="115" column="31" lean-forward="true" selection-start-line="115" selection-start-column="31" selection-end-line="115" selection-end-column="31" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="e#1801#1817#0" expanded="true" />
+                <element signature="e#3642#3658#0" expanded="true" />
+                <element signature="e#3513#3514#0" expanded="true" />
+                <element signature="e#3552#3553#0" expanded="true" />
+                <element signature="e#3597#3598#0" expanded="true" />
+                <element signature="e#3637#3638#0" expanded="true" />
+                <element signature="e#6372#6373#0" expanded="true" />
+                <element signature="e#6406#6407#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/sgraph/LeafNode.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="213">
-              <caret line="190" column="71" selection-start-line="190" selection-start-column="71" selection-end-line="190" selection-end-column="71" />
+            <state relative-caret-position="187">
+              <caret line="386" lean-forward="true" selection-start-line="386" selection-end-line="386" />
               <folding>
                 <element signature="e#1142#1143#0" expanded="true" />
                 <element signature="e#1191#1192#0" expanded="true" />
@@ -112,8 +118,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/sgraph/RaytracerRenderer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="207">
-              <caret line="299" lean-forward="true" selection-start-line="299" selection-end-line="299" />
+            <state relative-caret-position="107">
+              <caret line="209" column="10" selection-start-line="209" selection-start-column="10" selection-end-line="209" selection-end-column="10" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#9273#9274#0" expanded="true" />
@@ -154,6 +160,7 @@
       <find>shade(</find>
       <find>shade</find>
       <find>POSI</find>
+      <find>refraction</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -192,11 +199,11 @@
         <option value="$PROJECT_DIR$/src/main/java/rtHelpers/Ray3D.java" />
         <option value="$PROJECT_DIR$/src/main/java/sgraph/Scenegraph.java" />
         <option value="$PROJECT_DIR$/src/main/java/sgraph/GL3ScenegraphRenderer.java" />
-        <option value="$PROJECT_DIR$/src/main/java/View.java" />
         <option value="$PROJECT_DIR$/src/main/resources/scenegraphmodels/face-hierarchy.xml" />
         <option value="$PROJECT_DIR$/src/main/java/sgraph/RaytracerRenderer.java" />
         <option value="$PROJECT_DIR$/src/main/java/JOGLFrame.java" />
         <option value="$PROJECT_DIR$/src/main/java/sgraph/LeafNode.java" />
+        <option value="$PROJECT_DIR$/src/main/java/View.java" />
       </list>
     </option>
   </component>
@@ -306,7 +313,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554948823253" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554949305685" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../CS 5004/intellij/IOAbstractionFromClass" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
@@ -449,7 +456,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="19663000" />
+    <option name="totallyTimeSpent" value="19861000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="4" y="23" width="829" height="877" extended-state="0" />
@@ -663,34 +670,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/View.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2094">
-          <caret line="237" selection-start-line="237" selection-end-line="237" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/resources/scenegraphmodels/face-hierarchy.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="127">
           <caret line="65" column="16" lean-forward="true" selection-start-line="65" selection-start-column="16" selection-end-line="65" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/sgraph/RaytracerRenderer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="207">
-          <caret line="299" lean-forward="true" selection-start-line="299" selection-end-line="299" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#9273#9274#0" expanded="true" />
-            <element signature="e#9341#9342#0" expanded="true" />
-            <element signature="e#9459#9460#0" expanded="true" />
-            <element signature="e#9490#9491#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -709,14 +692,46 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/sgraph/LeafNode.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="213">
-          <caret line="190" column="71" selection-start-line="190" selection-start-column="71" selection-end-line="190" selection-end-column="71" />
+        <state relative-caret-position="187">
+          <caret line="386" lean-forward="true" selection-start-line="386" selection-end-line="386" />
           <folding>
             <element signature="e#1142#1143#0" expanded="true" />
             <element signature="e#1191#1192#0" expanded="true" />
             <element signature="e#1353#1354#0" expanded="true" />
             <element signature="e#1387#1388#0" expanded="true" />
             <element signature="e#12902#12903#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/sgraph/RaytracerRenderer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="107">
+          <caret line="209" column="10" selection-start-line="209" selection-start-column="10" selection-end-line="209" selection-end-column="10" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#9273#9274#0" expanded="true" />
+            <element signature="e#9341#9342#0" expanded="true" />
+            <element signature="e#9459#9460#0" expanded="true" />
+            <element signature="e#9490#9491#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/View.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="112">
+          <caret line="115" column="31" lean-forward="true" selection-start-line="115" selection-start-column="31" selection-end-line="115" selection-end-column="31" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1801#1817#0" expanded="true" />
+            <element signature="e#3642#3658#0" expanded="true" />
+            <element signature="e#3513#3514#0" expanded="true" />
+            <element signature="e#3552#3553#0" expanded="true" />
+            <element signature="e#3597#3598#0" expanded="true" />
+            <element signature="e#3637#3638#0" expanded="true" />
+            <element signature="e#6372#6373#0" expanded="true" />
+            <element signature="e#6406#6407#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -112,6 +112,25 @@ public class View {
       raytrace();
       isRaytraceOn = false;
     } else {
+
+      // Reset needed variables
+      if (normalRenderer == null) {
+        normalRenderer = new GL3ScenegraphRenderer();
+        normalRenderer.setContext(gla);
+
+        Map<String, String> shaderVarsToVertexAttribs = new HashMap<String, String>();
+        shaderVarsToVertexAttribs.put("vPosition", "position");
+        shaderVarsToVertexAttribs.put("vNormal", "normal");
+        shaderVarsToVertexAttribs.put("vTexCoord", "texcoord");
+        normalRenderer.initShaderProgram(program, shaderVarsToVertexAttribs);
+
+        try {
+          scenegraph.setRenderer(normalRenderer);
+        } catch (Exception e) {
+          System.out.println("Failed to set renderer to normalRenderer again");
+        }
+      }
+
       drawNormal(gla);
     }
   }
@@ -154,22 +173,6 @@ public class View {
 
   // Draw scene as usual
   private void drawNormal(GLAutoDrawable gla) {
-      if (normalRenderer == null) {
-          normalRenderer = new GL3ScenegraphRenderer();
-          normalRenderer.setContext(gla);
-
-          Map<String, String> shaderVarsToVertexAttribs = new HashMap<String, String>();
-          shaderVarsToVertexAttribs.put("vPosition", "position");
-          shaderVarsToVertexAttribs.put("vNormal", "normal");
-          shaderVarsToVertexAttribs.put("vTexCoord", "texcoord");
-          normalRenderer.initShaderProgram(program, shaderVarsToVertexAttribs);
-
-          try {
-              scenegraph.setRenderer(normalRenderer);
-          } catch (Exception e) {
-              System.out.println("Failed to set renderer to normalRenderer again");
-          }
-      }
 
     GL3 gl = gla.getGL().getGL3();
 
