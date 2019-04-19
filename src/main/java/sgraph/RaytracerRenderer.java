@@ -361,13 +361,6 @@ public class RaytracerRenderer implements IScenegraphRenderer {
         }
     }
 
-    private Color getColorForRefraction(HitRecord hitRecord, INode root, Stack<Matrix4f> mv, Ray3D ray3D, int recurrenceCount) {
-        if (!hitRecord.isHit()) {
-            return new Color(0,0, 0);
-        }
-
-        return shade(hitRecord, root, mv, ray3D, recurrenceCount, 1);
-    }
 
     // clamp the color
     private void clamp(Vector3f color) {
@@ -407,6 +400,14 @@ public class RaytracerRenderer implements IScenegraphRenderer {
                 tempRef.add(color.x * reflection, color.y * reflection, color.z * reflection, 0);
             }
         }
+    }
+
+    private Color getColorForRefraction(HitRecord hitRecord, INode root, Stack<Matrix4f> mv, Ray3D ray3D, int recurrenceCount) {
+        if (!hitRecord.isHit()) {
+            return new Color(0,0, 0);
+        }
+
+        return shade(hitRecord, root, mv, ray3D, recurrenceCount, 1);
     }
 
     @Override
