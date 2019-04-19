@@ -15,10 +15,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Stack;
 
 public class RaytracerRenderer implements IScenegraphRenderer {
 
@@ -27,12 +25,15 @@ public class RaytracerRenderer implements IScenegraphRenderer {
     private List<Light> lights;
     public int width, height;
     public float fov;
+    private Color refractionColor;
+    private static final int MAX_REUCRRENCE_COUNT = 5;
 
     public RaytracerRenderer(float fov, int w, int h) {
         textures = new HashMap<>();
         this.fov = fov;
         width = w;
         height = h;
+        refractionColor = new Color(0, 0, 0);
     }
 
     @Override
@@ -106,13 +107,13 @@ public class RaytracerRenderer implements IScenegraphRenderer {
         root.intersect(ray3D, mv, hitRecord, textures);
 
         if (hitRecord.isHit()) {
-            color = shade(hitRecord, root, mv);
+            color = shade(hitRecord, root, mv, ray3D, 0, 1);
         } else {
             color = new Color(0, 0, 0);
         }
     }
 
-    private Color shade(HitRecord hitRecord, INode root, Stack<Matrix4f> mv) {
+    private Color shade(HitRecord hitRecord, INode root, Stack<Matrix4f> mv, Ray3D ray3D, int recurrenceCount, float tempRefraction) {
         Vector3f color = new Vector3f(0, 0, 0);
 
         for (int i = 0; i < lights.size(); i++) {
@@ -151,28 +152,28 @@ public class RaytracerRenderer implements IScenegraphRenderer {
             boolean doesPointNotSeeLight = false;
 
             if (light.getPosition().w != 0) {
-                Vector4f p = new Vector4f(hitRecord.startPoint);
+                Vector4f pos = new Vector4f(hitRecord.startPoint);
                 Vector4f v = new Vector4f(new Vector3f(lightVector), 0);
 
-                p = p.add(new Vector4f(v).mul(0.1f));
+                pos = pos.add(new Vector4f(v).mul(0.1f));
 
                 HitRecord hit = new HitRecord();
 
-                root.intersect(new Ray3D(p, v), mv, hit, textures);
+                root.intersect(new Ray3D(pos, v), mv, hit, textures);
 
                 if (hit.isHit()) {
                     doesPointNotSeeLight = true;
                 }
             } else {
-                Vector4f p = new Vector4f(hitRecord.startPoint);
+                Vector4f pos = new Vector4f(hitRecord.startPoint);
                 Vector4f v = new Vector4f(new Vector3f(lightVector), 0);
                 // Avoiding precision errors
-                p = p.add(new Vector4f(v).mul(0.1f));
+                pos = pos.add(new Vector4f(v).mul(0.1f));
 
                 HitRecord hit = new HitRecord();
-                root.intersect(new Ray3D(p, v), mv, hit, textures);
+                root.intersect(new Ray3D(pos, v), mv, hit, textures);
 
-                if (hit.isHit() && light.getPosition().distance(new Vector4f(p)) - hit.getT() > 0.0001f) {
+                if (hit.isHit() && light.getPosition().distance(new Vector4f(pos)) - hit.getT() > 0.0001f) {
                     doesPointNotSeeLight = true;
                 }
             }
@@ -250,9 +251,122 @@ public class RaytracerRenderer implements IScenegraphRenderer {
         sin(thetaI)/sin(thetaT) = MuT / MuI
          */
 
+        ////////////////////////
+        // REFLECTION FOR HW8 //
+        ////////////////////////
+
+
+        float reflection = hitRecord.material.getReflection();
+
+        // clamp to range(0,1)
+        if (reflection > 1 || reflection < 0) {
+            reflection = 0;
+        }
+
+        Vector4f reflectionRef = new Vector4f(0, 0, 0, 1);
+
+        if (reflection != 0) {
+            Vector3f rayIn =
+                    new Vector3f(ray3D.direction.x, ray3D.direction.y, ray3D.direction.z);
+
+            Vector4f reflectionRay = new Vector4f(new Vector3f(rayIn).reflect
+                    (hitRecord.normal.x, hitRecord.normal.y, hitRecord.normal.z), 0);
+
+            Ray3D rayOut = new Ray3D(hitRecord.startPoint.add(new Vector4f(reflectionRay).mul(0.01f)), reflectionRay);
+
+            raycastRecurrences(rayOut, mv, reflectionRef,
+                    recurrenceCount, reflection, root, tempRefraction);
+        }
+
+
+        color = color.add(new Vector3f(reflectionRef.x, reflectionRef.y, reflectionRef.z));
+
+        /////////////////////////////////////////////
+        // REFRACTION EXTRA CREDIT ATTEMPT FOR HW8 //
+        /////////////////////////////////////////////
+
+        /*
+        NOTE to remember: The blend is proportional to the object’s absorption,
+        reflection and transparency
+        */
+
+        float transparency = hitRecord.material.getTransparency();
+
+        Vector4f refraction = new Vector4f(0,0,0,1);
+
+        if (transparency != 0) {
+            Vector3f rayDirection = new Vector3f(ray3D.direction.x, ray3D.direction.y, ray3D
+                    .direction.z);
+
+
+            Vector3f normal = new Vector3f(hitRecord.normal.x, hitRecord.normal.y, hitRecord.normal.z);
+
+            float cosIn = normal.dot(rayDirection) * -1f;
+            float sinIn = 1f - ((float) Math.pow(cosIn, 2));
+
+            // n = 1.5 for glass
+            float glassIOR = 1.5f;
+
+            float fraction;
+
+            if (Math.abs(tempRefraction - 1f) < 0.0001f) {
+                fraction = 1f / glassIOR;
+            } else {
+                fraction = glassIOR / 1f;
+                hitRecord.normal.negate();
+            }
+
+            float sinOut = sinIn * ((float) Math.pow(fraction, 2));
+            float cosOut = 1f - sinOut;
+
+            Vector3f refractionDirection;
+
+            if (sinOut >= 0f) {
+                float cosOutR = (float) Math.sqrt(cosOut);
+
+                refractionDirection = (new Vector3f(normal).mul(cosIn).add(rayDirection)).mul(fraction)
+                        .sub(new Vector3f(normal).mul(cosOutR));
+
+                Vector4f refractionDirectionNormalized = new Vector4f(refractionDirection, 0).normalize();
+
+                Ray3D outRay = new Ray3D(hitRecord.startPoint.add(new Vector4f(refractionDirectionNormalized).mul(0.01f)),
+                        refractionDirectionNormalized);
+
+                HitRecord newHit = new HitRecord();
+
+                raycastForRefraction(outRay, mv, root, newHit, recurrenceCount);
+
+                refraction = new Vector4f((float) refractionColor.getRed()/255,
+                        (float) this.refractionColor.getGreen() / 255, (float) refractionColor
+                        .getBlue() / 255, 1 );
+                refraction = new Vector4f(refraction.x * transparency, refraction
+                        .y * transparency, refraction.z * transparency, 1);
+            }
+
+        }
+
+        // apply refraction
+        color = color.add(new Vector3f(refraction.x, refraction.y, refraction.z));
+
         clamp(color);
 
         return new Color((int) (255 * color.x), (int) (255 * color.y), (int) (255 * color.z));
+    }
+
+    private void raycastForRefraction(Ray3D outboundRay, Stack<Matrix4f> mv,  INode root, HitRecord hitRecord, int recurrenceCount) {
+        if (recurrenceCount < MAX_REUCRRENCE_COUNT) {
+            raycast(outboundRay, root, mv, hitRecord);
+            recurrenceCount += 1;
+            refractionColor = getColorForRefraction(hitRecord, root, mv, outboundRay, recurrenceCount);
+        }
+    }
+
+    private Color getColorForRefraction(HitRecord hitRecord, INode root, Stack<Matrix4f> mv, Ray3D ray3D, int recurrenceCount) {
+        if (!hitRecord.isHit()) {
+            return new Color(0,0, 0);
+        }
+
+        return shade(hitRecord, root, mv, ray3D, recurrenceCount, 1);
     }
 
     // clamp the color
@@ -273,6 +387,25 @@ public class RaytracerRenderer implements IScenegraphRenderer {
             color.z = 0;
         } else if (color.z > 1) {
             color.z = 1;
+        }
+    }
+
+    private void raycastRecurrences(Ray3D outboundRay, Stack<Matrix4f> mv, Vector4f tempRef, int recurrenceCount, float reflection, INode root, float tempRefraction) {
+        if (recurrenceCount <= MAX_REUCRRENCE_COUNT) {
+
+            HitRecord hitRecord = new HitRecord();
+            root.intersect(outboundRay, mv, hitRecord, textures);
+
+            boolean didHit = hitRecord.isHit();
+
+            if (didHit) {
+                recurrenceCount += 1;
+
+                Color shadeColor = shade(hitRecord, root, mv, outboundRay, recurrenceCount, tempRefraction);
+                Vector4f color = new Vector4f((float) shadeColor.getRed() / 255, (float) shadeColor.getGreen() / 255, (float) shadeColor.getBlue() / 255, 1);
+
+                tempRef.add(color.x * reflection, color.y * reflection, color.z * reflection, 0);
+            }
         }
     }
 

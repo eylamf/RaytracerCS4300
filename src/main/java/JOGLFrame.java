@@ -50,7 +50,7 @@ public class JOGLFrame extends JFrame {
           view.init(canvas);
           InputStream in = getClass().getClassLoader()
                   .getResourceAsStream
-                          ("scenegraphmodels/face-hierarchy" +
+                          ("scenegraphmodels/basic-scene" +
                                   ".xml");
           view.initScenegraph(canvas, in);
           textRenderer = new JOGLGraphTextRenderer(glAutoDrawable);

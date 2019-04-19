@@ -1,0 +1,196 @@
+<scene>
+    <instance name="sphere" path="models/sphere"/>
+    <instance name="box" path="models/box-outside"/>
+    <image name="white" path="textures/white.png"/>
+    <image name="earth" path="textures/earthmap.png"/>
+    <image name="dice" path="textures/die.png"/>
+    <image name="checkerboard" path="textures/checkerboard-box.png"/>
+    <light>
+        <ambient>0.8 0.8 0.8</ambient>
+        <diffuse>0.8 0.8 0.8</diffuse>
+        <specular>0.8 0.8 0.8</specular>
+        <position>-60 10 0</position>
+        <spotangle>180</spotangle>
+        <spotdirection>0 -1 0</spotdirection>
+    </light>
+    <light>
+        <ambient>0.2 0.2 0.2</ambient>
+        <diffuse>0.4 0.4 0.4</diffuse>
+        <specular>0.4 0.4 0.4</specular>
+        <position>0 100 0</position>
+        <spotangle>80</spotangle>
+        <spotdirection>0 -1 0</spotdirection>
+    </light>
+    <light>
+        <ambient>0.2 0.2 0.2</ambient>
+        <diffuse>0.4 0.4 0.4</diffuse>
+        <specular>0.4 0.4 0.4</specular>
+        <position>100 100 -100</position>
+        <spotangle>180</spotangle>
+        <spotdirection>0 -1 0</spotdirection>
+    </light>
+    <group>
+        <transform>
+            <set>
+                <scale>50 50 50</scale>
+            </set>
+            <object instanceof="sphere" texture="earth">
+                <material>
+                    <ambient>0.2 0.2 0.2</ambient>
+                    <diffuse>0.8 0.8 0.8</diffuse>
+                    <specular>1 1 1</specular>
+                </material>
+            </object>
+        </transform>
+        <transform>
+            <set>
+                <translate>100 0 0</translate>
+                <scale>40 40 40</scale>
+                <rotate>45 0 1 0</rotate>
+            </set>
+            <object instanceof="sphere">
+                <material>
+                    <ambient>0.1 0.2 0.2</ambient>
+                    <diffuse>0.1 0.8 0.8</diffuse>
+                    <specular>1 1 1</specular>
+                    <absorption>.5</absorption>
+                    <reflection>.5</reflection>
+                </material>
+            </object>
+        </transform>
+        <transform>
+            <set>
+                <translate>-100 0 0</translate>
+                <scale>30 30 30</scale>
+                <rotate>45 0 1 0</rotate>
+            </set>
+            <object instanceof="sphere">
+                <material>
+                    <ambient>0.2 0.2 0.2</ambient>
+                    <diffuse>0.4 0.4 0.4</diffuse>
+                    <specular>1 1 1</specular>
+                    <absorption>.5</absorption>
+                    <reflection>.5</reflection>
+                </material>
+            </object>
+        </transform>
+        <transform>
+            <set>
+                <translate>0 0 -170</translate>
+                <scale>20 20 20</scale>
+                <rotate>45 1 1 1</rotate>
+            </set>
+            <object instanceof="sphere">
+                <material>
+                    <ambient>0.2 0.2 0.2</ambient>
+                    <diffuse>0.8 0.8 0.8</diffuse>
+                    <specular>0.8 0.8 0.8</specular>
+                    <shininess>100</shininess>
+                </material>
+            </object>
+        </transform>
+        <transform>
+            <set>
+                <translate>100 0 -140</translate>
+                <scale>20 20 20</scale>
+                <rotate>45 1 1 1</rotate>
+            </set>
+            <object instanceof="sphere">
+                <material>
+                    <ambient>0.2 0.2 0.2</ambient>
+                    <diffuse>0.8 0.8 0.8</diffuse>
+                    <specular>0.8 0.8 0.8</specular>
+                    <shininess>100</shininess>
+                </material>
+            </object>
+        </transform>
+        <transform>
+            <set>
+                <translate>0 0 -100</translate>
+                <scale>40 40 40</scale>
+                <rotate>45 1 1 1</rotate>
+            </set>
+            <object instanceof="sphere">
+                <material>
+                    <ambient>0.2 0.2 0.2</ambient>
+                    <diffuse>0.8 0.8 0.8</diffuse>
+                    <specular>0.8 0.8 0.8</specular>
+                    <absorption>.5</absorption>
+                    <reflection>.5</reflection>
+                </material>
+            </object>
+        </transform>
+        <transform>
+            <set>
+                <translate>0 0 100</translate>
+                <scale>40 40 40</scale>
+            </set>
+            <object instanceof="box" texture="dice">
+                <material>
+                    <ambient>0.1 0.1 0.2</ambient>
+                    <diffuse>0.5 0.5 0.8</diffuse>
+                    <specular>0.5 0.5 0.8</specular>
+                    <shininess>100</shininess>
+                </material>
+            </object>
+        </transform>
+        <transform>
+            <set>
+                <translate>0 40 100</translate>
+                <scale>40 40 40</scale>
+            </set>
+            <object instanceof="box" texture="dice">
+                <material>
+                    <ambient>0.3 0.3 0.3</ambient>
+                    <diffuse>0.5 0.5 0.5</diffuse>
+                    <specular>1 1 1</specular>
+                    <shininess>100</shininess>
+                </material>
+            </object>
+        </transform>
+        <transform>
+            <set>
+                <translate>0 80 100</translate>
+                <scale>40 40 40</scale>
+            </set>
+            <object instanceof="box" texture="dice">
+                <material>
+                    <ambient>0.3 0.3 0.3</ambient>
+                    <diffuse>0.5 0.5 0.5</diffuse>
+                    <specular>1 1 1</specular>
+                    <shininess>100</shininess>
+                </material>
+            </object>
+        </transform>
+        <transform>
+            <set>
+                <translate>0 120 100</translate>
+                <scale>50 50 50</scale>
+                <rotate>0 0 45 1</rotate>
+            </set>
+            <object instanceof="box" texture="dice">
+                <material>
+                    <ambient>0.6 0.6 0.6</ambient>
+                    <diffuse>0.5 0.5 0.5</diffuse>
+                    <specular>1 1 1</specular>
+                    <shininess>100</shininess>
+                </material>
+            </object>
+        </transform>
+        <transform>
+            <set>
+                <translate>-50 -50 -50</translate>
+                <scale>500 4 500</scale>
+                <translate>0 -0.5 0</translate>
+            </set>
+            <object instanceof="box" texture="checkerboard">
+                <material>
+                    <ambient>0.4 0.4 0.4</ambient>
+                    <diffuse>0.8 0.8 0.8</diffuse>
+                    <specular>0.5 0.5 0.5</specular>
+                    <absorption>1</absorption>
+                </material>
+            </object>
+        </transform>
+    </group>
+</scene>
